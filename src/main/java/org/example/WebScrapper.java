@@ -8,10 +8,16 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class WebScrapper {
-        public static int saveProducts(JSONObject obj) {
+
+    public static int saveProducts(JSONObject obj) throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;TrustServerCertificate=True", "sa", "Maxsteel1");
             JSONArray listaPrecios = obj.getJSONArray("products");
             ArrayList<Producto> lista = new ArrayList<Producto>();
             for (Object val : listaPrecios
@@ -21,13 +27,22 @@ public class WebScrapper {
                 Integer precio = objetito.getJSONObject("price").getInt("BasePriceSales");
                 String imagen = objetito.getJSONObject("images").getString("defaultImage");
                 String sku = objetito.getString("sku");
-                Producto producto = new Producto(nombre, precio, imagen, sku, "Computacion");
+                Producto producto = new Producto(1,nombre, precio, imagen, sku, "Computacion");
+                PreparedStatement statement = conn.prepareStatement("INSERT INTO Productos VALUES (?,?,?,?,?,?)");
+                statement.setInt(1, producto.sitiosID);
+                statement.setString(2,producto.nombre);
+                statement.setInt(3,Integer.parseInt(String.valueOf(producto.precio)));
+                statement.setString(4,producto.imagen);
+                statement.setString(5,producto.sku);
+                statement.setString(6,producto.categoria);
+                int filasAfectadas = statement.executeUpdate();
+                System.out.println("Filas afectadas: " + filasAfectadas);
                 lista.add(producto);
                 System.out.println(objetito);
             }
             return lista.size();
         }
-        public static void GetPages(ArrayList<String> urls) throws URISyntaxException {
+        public static void GetPages(ArrayList<String> urls) throws URISyntaxException, SQLException {
             int cantidad = 0;
             for (int i= 0; i <= urls.size(); i++){
                 String jsonBody = urls.get(i);
@@ -54,7 +69,7 @@ public class WebScrapper {
             System.out.println(cantidad);
             System.out.println("Finalizado");
         }
-        public static void main(String categoria) throws URISyntaxException, IOException, InterruptedException {
+        public static void main(String categoria) throws URISyntaxException, IOException, InterruptedException, SQLException {
             System.out.println("Starting..");
             String jsonBody = String.format("{\"categories\":\"%s\",\"page\":1,\"facets\":[],\"sortBy\":\"\",\"hitsPerPage\":100}", categoria);
             HttpRequest request = null;

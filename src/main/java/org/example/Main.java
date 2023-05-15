@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,6 +18,8 @@ public class Main {
                 throw new RuntimeException(e);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         });
         executor.submit(() -> {
@@ -28,6 +31,8 @@ public class Main {
                 throw new RuntimeException(e);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         });
         executor.submit(() -> {
@@ -37,14 +42,14 @@ public class Main {
                 throw new RuntimeException(e);
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | SQLException e) {
                 throw new RuntimeException(e);
             }
         });
         executor.submit(() -> {
             try {
                 WebScrapper.main("Electrohogar/Electrodomésticos Cocina");
-            } catch (URISyntaxException e) {
+            } catch (URISyntaxException | SQLException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
                 throw new RuntimeException(e);
